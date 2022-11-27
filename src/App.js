@@ -52,7 +52,8 @@ const App = () => {
     if (uploadedImages.length > 0) {
       const pdf = generatePdfFromImages(uploadedImages);
       console.log(canvasJSON,resendFiles);
-      saveAs(pdf,"p1.pdf");
+      const pdfURL = pdf.output("bloburl");
+      saveAs(pdfURL, `pd1.pdf`);
     }
     // eslint-disable-next-line
   }, [uploadedImages, cleanUpUploadedImages]);
