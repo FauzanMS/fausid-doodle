@@ -1,6 +1,8 @@
 import * as React from "react";
 import './App.css';
+import { fileToImageURL, generatePdfFromImages } from "./utils/helpers.tsx";
 import { Whiteboard } from "react-whiteboard";
+import {saveAs} from "file-saver";
 
 const App = () => {
   const [files, setFiles] = React.useState({});
@@ -8,19 +10,54 @@ const App = () => {
 
   const [canvasJSON, setCanvasJSON] = React.useState({});
 
-  React.useEffect(() => {
-    if (Object.values(files).length > 0) {
-      if (resendFiles) {
+  const [uploadedImages, setUploadedImages] = React.useState([]);
 
-      }
-      console.log(Object.values(files));
-      console.log(canvasJSON);
-      // for (let i = 0; i < Object.values(files).length; i++) {
-      //   saveAs(Object.values(files)[i], `page${i + 1}.png`);
-      // }
+  const cleanUpUploadedImages = React.useCallback(() => {
+    setUploadedImages([]);
+    uploadedImages.forEach((image) => {
+      URL.revokeObjectURL(image.src);
+    });
+    // eslint-disable-next-line
+  }, [setUploadedImages, uploadedImages]);
+
+  const handleImageUpload = (files) => {
+    const fileList = files;
+    const fileArray = fileList ? Array.from(fileList) : [];
+    const fileToImagePromises = fileArray.map(fileToImageURL);
+
+    Promise.all(fileToImagePromises).then(setUploadedImages);
+  }
+
+
+  React.useEffect(() => {
+    if (uploadedImages.length > 0) {
+      generatePdfFromImage(uploadedImages);
     }
     // eslint-disable-next-line
-  }, [files, resendFiles])
+  }, [uploadedImages])
+
+  React.useEffect(() => {
+    const pdfFunc = async () => {
+      handleImageUpload(Object.values(files));
+    }
+
+    if (Object.values(files).length > 0) {
+      pdfFunc();
+    }
+    // eslint-disable-next-line
+  }, [files]);
+
+
+  const generatePdfFromImage = React.useCallback((uploadedImages) => {
+    if (uploadedImages.length > 0) {
+      const pdf = generatePdfFromImages(uploadedImages);
+      console.log(canvasJSON,resendFiles);
+      saveAs(pdf,"p1.pdf");
+    }
+    // eslint-disable-next-line
+  }, [uploadedImages, cleanUpUploadedImages]);
+
+
 
   const color = [
     {
