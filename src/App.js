@@ -5,11 +5,13 @@ import { Whiteboard } from "react-whiteboard";
 import { saveAs } from "file-saver";
 import TransitionsModal from "./components/Modal";
 import { Button, TextField } from "@mui/material";
+import SimpleBackdrop from "./components/Backdrop";
 
 const App = () => {
   const [files, setFiles] = React.useState({});
   const [resendFiles, setResendFiles] = React.useState(false);
   const [open, setOpen] = React.useState(false);
+  const [spinner, setSpinner] = React.useState(false);
   const [fileName, setFileName] = React.useState('');
   const [canvasJSON, setCanvasJSON] = React.useState({});
   const [uploadedImages, setUploadedImages] = React.useState([]);
@@ -52,12 +54,15 @@ const App = () => {
       console.log(canvasJSON, resendFiles);
       const pdfURL = pdf.output("bloburl");
       saveAs(pdfURL, `${fileName}.pdf`);
-      setOpen(false);
+      setSpinner(false);
+      window.location.reload();
     }
     // eslint-disable-next-line
   }, [uploadedImages, cleanUpUploadedImages]);
 
   const pdfFunc = async () => {
+    setOpen(false);
+    setSpinner(true);
     handleImageUpload(Object.values(files));
   }
 
@@ -101,6 +106,7 @@ const App = () => {
 
   return (
     <div>
+      <SimpleBackdrop open={spinner} handleClose={() => setSpinner(false)} />
       <TransitionsModal open={open} handleClose={() => setOpen(false)}>
         <h3>Please enter a name for your PDF 🥰❤️</h3>
         <div className="modal_flex">
